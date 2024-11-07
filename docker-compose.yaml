@@ -1,0 +1,12 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:8.0.29
+    platform: linux/x86_64
+    environment: # .envファイルに記述したほうがいいが、開発用なので直接記述
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: reversi
+      MYSQL_USER: reversi
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
