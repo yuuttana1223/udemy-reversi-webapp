@@ -16,6 +16,12 @@ app.get("/api/error", async (req, res) => {
   throw new Error("error endpoint");
 });
 
+app.post("/api/games", async (req, res) => {
+  const startedAt = new Date();
+  console.log("Started at", startedAt);
+  res.status(201).end();
+});
+
 app.use(errorHandler);
 
 app.listen(PORT, () => {
