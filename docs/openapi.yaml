@@ -13,7 +13,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
+                type: object
                 properties:
                   games:
                     type: array
