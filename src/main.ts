@@ -1,7 +1,25 @@
 import express from "express";
 import morgan from "morgan";
 import "express-async-errors";
-import mysql, { ResultSetHeader } from "mysql2/promise";
+import mysql, { ResultSetHeader, RowDataPacket } from "mysql2/promise";
+
+type Game = RowDataPacket & {
+  id: number;
+  started_at: Date;
+};
+
+type Turn = RowDataPacket & {
+  id: number;
+  turn_count: number;
+  next_disc: number;
+  end_at: Date | null;
+};
+
+type Square = RowDataPacket & {
+  x: number;
+  y: number;
+  disc: number;
+};
 
 const EMPTY = 0;
 const DARK = 1;
@@ -34,13 +52,7 @@ app.get("/api/error", async (req, res) => {
 
 app.post("/api/games", async (req, res) => {
   const now = new Date();
-  const conn = await mysql.createConnection({
-    host: "localhost",
-    user: "reversi",
-    database: "reversi",
-    password: "password",
-  });
-
+  const conn = await connectMySQL();
   try {
     await conn.beginTransaction();
 
@@ -63,8 +75,8 @@ app.post("/api/games", async (req, res) => {
       .fill("(?, ?, ?, ?)")
       .join(", ")}`;
     const squaresInsertValues = INITIAL_BOARD.flatMap((row, y) =>
-      row.map((disc, x) => [turnId, x, y, disc])
-    ).flat();
+      row.flatMap((disc, x) => [turnId, x, y, disc])
+    );
     await conn.execute(squaresInsertSQL, squaresInsertValues);
 
     await conn.commit();
@@ -73,6 +85,47 @@ app.post("/api/games", async (req, res) => {
   }
 
   res.status(201).end();
+});
+
+app.get("/api/games/latest/turns/:turnCount", async (req, res) => {
+  const turnCount = Number(req.params.turnCount);
+
+  const conn = await connectMySQL();
+  try {
+    const gameSelectResult = await conn.execute<Game[]>(
+      "SELECT id, started_at FROM games ORDER BY id DESC LIMIT 1"
+    );
+    const game = gameSelectResult[0][0];
+
+    const turnSelectResult = await conn.execute<Turn[]>(
+      "SELECT id, turn_count, next_disc, end_at FROM turns WHERE game_id = ? AND turn_count = ?",
+      [game.id, turnCount]
+    );
+
+    const turn = turnSelectResult[0][0];
+
+    const squaresSelectResult = await conn.execute<Square[]>(
+      "SELECT x, y, disc FROM squares WHERE turn_id = ?",
+      [turn.id]
+    );
+
+    const squares = squaresSelectResult[0];
+    const board = squares.reduce((acc, square) => {
+      acc[square.y][square.x] = square.disc;
+      return acc;
+    }, INITIAL_BOARD);
+
+    const responseBody = {
+      turnCount,
+      board,
+      nextDisc: turn.next_disc,
+      // TODO: 決着がついている場合、game_resultsテーブルから取得する
+      winnerDisc: null,
+    };
+    res.json(responseBody);
+  } finally {
+    await conn.end();
+  }
 });
 
 app.use(errorHandler);
@@ -89,4 +142,13 @@ function errorHandler(
 ) {
   console.error("Unexpected error occurred", err);
   res.status(500).send({ message: "Unexpected error occurred" });
+}
+
+async function connectMySQL() {
+  return mysql.createConnection({
+    host: "localhost",
+    user: "reversi",
+    database: "reversi",
+    password: "password",
+  });
 }
