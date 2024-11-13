@@ -41,6 +41,7 @@ const app = express();
 
 app.use(morgan("dev"));
 app.use(express.static("static", { extensions: ["html"] }));
+app.use(express.json());
 
 app.get("/api/hello", async (req, res) => {
   res.json({ message: "Hello World" });
@@ -123,6 +124,73 @@ app.get("/api/games/latest/turns/:turnCount", async (req, res) => {
       winnerDisc: null,
     };
     res.json(responseBody);
+  } finally {
+    await conn.end();
+  }
+});
+
+app.post("/api/games/latest/turns", async (req, res) => {
+  const turnCount = parseInt(req.body.turnCount);
+  const disc = parseInt(req.body.move.disc);
+  const x = parseInt(req.body.move.x);
+  const y = parseInt(req.body.move.y);
+
+  // 1つ前のターンを取得
+  const conn = await connectMySQL();
+  try {
+    const gameSelectResult = await conn.execute<Game[]>(
+      "SELECT id, started_at FROM games ORDER BY id DESC LIMIT 1"
+    );
+    const game = gameSelectResult[0][0];
+
+    const prevTurnCount = turnCount - 1;
+    const turnSelectResult = await conn.execute<Turn[]>(
+      "SELECT id, turn_count, next_disc, end_at FROM turns WHERE game_id = ? AND turn_count = ?",
+      [game.id, prevTurnCount]
+    );
+
+    const turn = turnSelectResult[0][0];
+
+    const squaresSelectResult = await conn.execute<Square[]>(
+      "SELECT x, y, disc FROM squares WHERE turn_id = ?",
+      [turn.id]
+    );
+
+    const squares = squaresSelectResult[0];
+    const board = squares.reduce((acc, square) => {
+      acc[square.y][square.x] = square.disc;
+      return acc;
+    }, INITIAL_BOARD);
+
+    // 盤面におけるかチェック
+    // 石を置く
+    board[y][x] = disc;
+    // ひっくり返す
+    // ターンを保存する
+    const now = new Date();
+    const nextDisc = disc === DARK ? LIGHT : DARK;
+    const turnInsertResult = await conn.execute<ResultSetHeader>(
+      "INSERT INTO turns (game_id, turn_count, next_disc, end_at) VALUES (?, ?, ?, ?)",
+      [game.id, turnCount, nextDisc, now]
+    );
+    const turnId = turnInsertResult[0].insertId;
+
+    const squareCount = board.flat().length;
+    const squaresInsertSQL = `INSERT INTO squares (turn_id, x, y, disc) VALUES ${Array(
+      squareCount
+    )
+      .fill("(?, ?, ?, ?)")
+      .join(", ")}`;
+    const squaresInsertValues = board.flatMap((row, y) =>
+      row.flatMap((disc, x) => [turnId, x, y, disc])
+    );
+    await conn.execute(squaresInsertSQL, squaresInsertValues);
+
+    await conn.execute(
+      "INSERT INTO moves (turn_id, disc, x, y) VALUES (?, ?, ?, ?)",
+      [turnId, disc, x, y]
+    );
+    res.status(201).end();
   } finally {
     await conn.end();
   }
