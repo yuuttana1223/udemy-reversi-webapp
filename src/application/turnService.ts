@@ -10,8 +10,20 @@ const turnGateway = new TurnGateway();
 const moveGateway = new MoveGateway();
 const squareGateway = new SquareGateway();
 
+// DTO (Data Transfer Object)
+class FindLatestGameTurnByTurnCountOutput {
+  constructor(
+    public readonly turnCount: number,
+    public readonly board: number[][],
+    public readonly nextDisc?: number,
+    public readonly winnerDisc?: number
+  ) {}
+}
+
 export class TurnService {
-  async findLatestGameTurnByTurnCount(turnCount: number) {
+  async findLatestGameTurnByTurnCount(
+    turnCount: number
+  ): Promise<FindLatestGameTurnByTurnCountOutput> {
     const conn = await connectMySQL();
     try {
       const gameRecord = await gameGateway.fetchLatest(conn);
@@ -40,13 +52,14 @@ export class TurnService {
         return acc;
       }, INITIAL_BOARD);
 
-      return {
+      // memo: interfaceを使うと何がいけないのだろうか？
+      return new FindLatestGameTurnByTurnCountOutput(
         turnCount,
         board,
-        nextDisc: turnRecord.nextDisc,
+        turnRecord.nextDisc,
         // TODO: 決着がついている場合、game_resultsテーブルから取得する
-        winnerDisc: null,
-      };
+        undefined
+      );
     } finally {
       await conn.end();
     }
