@@ -3,6 +3,10 @@ import { GameGateway } from "../dataacesess/gameGateway";
 import { MoveGateway } from "../dataacesess/moveGateway";
 import { SquareGateway } from "../dataacesess/squareGateway";
 import { TurnGateway } from "../dataacesess/turnGateway";
+import { Board } from "../domain/board";
+import { toDisc } from "../domain/disc";
+import { Point } from "../domain/point";
+import { Turn } from "../domain/turn";
 import { DARK, INITIAL_BOARD, LIGHT } from "./constants";
 
 const gameGateway = new GameGateway();
@@ -48,7 +52,7 @@ export class TurnService {
         turnRecord.id
       );
       const board = squareRecords.reduce((acc, square) => {
-        acc[square.y][square.x] = square.disc;
+        acc[square.y][square.x] = toDisc(square.disc);
         return acc;
       }, INITIAL_BOARD);
 
@@ -93,27 +97,34 @@ export class TurnService {
       );
 
       const board = squareRecords.reduce((acc, square) => {
-        acc[square.y][square.x] = square.disc;
+        acc[square.y][square.x] = toDisc(square.disc);
         return acc;
       }, INITIAL_BOARD);
 
-      // 盤面におけるかチェック
+      const prevTurn = new Turn(
+        gameRecord.id,
+        prevTurnCount,
+        toDisc(prevTurnRecord.nextDisc),
+        undefined,
+        new Board(board),
+        prevTurnRecord.endAt
+      );
+
       // 石を置く
-      board[y][x] = disc;
-      // ひっくり返す
+      const newTurn = prevTurn.placeNext(toDisc(disc), new Point(x, y));
+
       // ターンを保存する
-      const now = new Date();
-      const nextDisc = disc === DARK ? LIGHT : DARK;
 
       const turnRecord = await turnGateway.insert(
         conn,
-        gameRecord.id,
-        turnCount,
-        nextDisc,
-        now
+        newTurn.gameId,
+        newTurn.turnCount,
+        newTurn.nextDisc,
+        newTurn.endAt
       );
 
-      await squareGateway.insertAll(conn, turnRecord.id, board);
+      await squareGateway.insertAll(conn, turnRecord.id, newTurn.board.discs);
+
       await moveGateway.insert(conn, turnRecord.id, disc, x, y);
     } finally {
       await conn.end();
