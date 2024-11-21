@@ -1,3 +1,4 @@
+import { INITIAL_BOARD } from "../application/constants";
 import { Disc } from "./disc";
 import { Move } from "./move";
 
@@ -25,3 +26,5 @@ export class Board {
     return new Board(newDiscs);
   }
 }
+
+export const initialBoard = new Board(INITIAL_BOARD);

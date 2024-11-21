@@ -1,4 +1,4 @@
-import { Board } from "./board";
+import { Board, initialBoard } from "./board";
 import { Disc } from "./disc";
 import { Move } from "./move";
 import { Point } from "./point";
@@ -60,4 +60,8 @@ export class Turn {
       new Date()
     );
   }
+}
+
+export function firstTurn(gameId: number, endAt: Date): Turn {
+  return new Turn(gameId, 0, Disc.Dark, undefined, initialBoard, endAt);
 }

@@ -1,12 +1,11 @@
 import { connectMySQL } from "../dataacesess/connection";
 import { GameGateway } from "../dataacesess/gameGateway";
-import { SquareGateway } from "../dataacesess/squareGateway";
-import { TurnGateway } from "../dataacesess/turnGateway";
-import { DARK, INITIAL_BOARD } from "./constants";
+import { firstTurn, Turn } from "../domain/turn";
+import { TurnRepository } from "../domain/turnRepository";
 
 const gameGateway = new GameGateway();
-const turnGateway = new TurnGateway();
-const squareGateway = new SquareGateway();
+
+const turnRepository = new TurnRepository();
 
 export class GameService {
   async startNewGame() {
@@ -17,15 +16,9 @@ export class GameService {
 
       const gameRecord = await gameGateway.insert(conn, now);
 
-      const turnRecord = await turnGateway.insert(
-        conn,
-        gameRecord.id,
-        0,
-        DARK,
-        now
-      );
+      const turn = firstTurn(gameRecord.id, now);
 
-      await squareGateway.insertAll(conn, turnRecord.id, INITIAL_BOARD);
+      await turnRepository.save(conn, turn);
 
       await conn.commit();
     } finally {
