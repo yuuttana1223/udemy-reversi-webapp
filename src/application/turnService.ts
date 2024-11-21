@@ -3,14 +3,13 @@ import { GameGateway } from "../dataacesess/gameGateway";
 import { MoveGateway } from "../dataacesess/moveGateway";
 import { SquareGateway } from "../dataacesess/squareGateway";
 import { TurnGateway } from "../dataacesess/turnGateway";
-import { Board } from "../domain/board";
 import { toDisc } from "../domain/disc";
 import { Point } from "../domain/point";
-import { Turn } from "../domain/turn";
-import { DARK, INITIAL_BOARD, LIGHT } from "./constants";
+import { TurnRepository } from "../domain/turnRepository";
 
 const gameGateway = new GameGateway();
 const turnGateway = new TurnGateway();
+const turnRepository = new TurnRepository();
 const moveGateway = new MoveGateway();
 const squareGateway = new SquareGateway();
 
@@ -35,32 +34,17 @@ export class TurnService {
         throw new Error("Latest game not found");
       }
 
-      const turnRecord = await turnGateway.findByGameIdAndTurnCount(
+      const turn = await turnRepository.findByGameIdAndTurnCount(
         conn,
         gameRecord.id,
         turnCount
       );
 
-      if (!turnRecord) {
-        throw new Error(
-          `Turn not fount. game_id: ${gameRecord.id}, turn_count: ${turnCount}`
-        );
-      }
-
-      const squareRecords = await squareGateway.findByTurnId(
-        conn,
-        turnRecord.id
-      );
-      const board = squareRecords.reduce((acc, square) => {
-        acc[square.y][square.x] = toDisc(square.disc);
-        return acc;
-      }, INITIAL_BOARD);
-
       // memo: interfaceを使うと何がいけないのだろうか？
       return new FindLatestGameTurnByTurnCountOutput(
         turnCount,
-        board,
-        turnRecord.nextDisc,
+        turn.board.discs,
+        turn.nextDisc,
         // TODO: 決着がついている場合、game_resultsテーブルから取得する
         undefined
       );
@@ -72,60 +56,24 @@ export class TurnService {
   async registerTurn(turnCount: number, disc: number, x: number, y: number) {
     const conn = await connectMySQL();
     try {
+      conn.beginTransaction();
       const gameRecord = await gameGateway.fetchLatest(conn);
       if (!gameRecord) {
         throw new Error("Latest game not found");
       }
 
       const prevTurnCount = turnCount - 1;
-
-      const prevTurnRecord = await turnGateway.findByGameIdAndTurnCount(
+      const prevTurn = await turnRepository.findByGameIdAndTurnCount(
         conn,
         gameRecord.id,
         prevTurnCount
       );
 
-      if (!prevTurnRecord) {
-        throw new Error(
-          `Turn not fount. game_id: ${gameRecord.id}, turn_count: ${prevTurnCount}`
-        );
-      }
-
-      const squareRecords = await squareGateway.findByTurnId(
-        conn,
-        prevTurnRecord.id
-      );
-
-      const board = squareRecords.reduce((acc, square) => {
-        acc[square.y][square.x] = toDisc(square.disc);
-        return acc;
-      }, INITIAL_BOARD);
-
-      const prevTurn = new Turn(
-        gameRecord.id,
-        prevTurnCount,
-        toDisc(prevTurnRecord.nextDisc),
-        undefined,
-        new Board(board),
-        prevTurnRecord.endAt
-      );
-
-      // 石を置く
       const newTurn = prevTurn.placeNext(toDisc(disc), new Point(x, y));
 
       // ターンを保存する
-
-      const turnRecord = await turnGateway.insert(
-        conn,
-        newTurn.gameId,
-        newTurn.turnCount,
-        newTurn.nextDisc,
-        newTurn.endAt
-      );
-
-      await squareGateway.insertAll(conn, turnRecord.id, newTurn.board.discs);
-
-      await moveGateway.insert(conn, turnRecord.id, disc, x, y);
+      await turnRepository.save(conn, newTurn);
+      conn.commit();
     } finally {
       await conn.end();
     }

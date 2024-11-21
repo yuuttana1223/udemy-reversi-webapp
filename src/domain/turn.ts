@@ -25,6 +25,10 @@ export class Turn {
     return this._nextDisc;
   }
 
+  get move(): Move | undefined {
+    return this._move;
+  }
+
   get endAt(): Date {
     return this._endAt;
   }
