@@ -4,9 +4,9 @@ import { toDisc } from "./disc";
 import { Move } from "./move";
 import { Point } from "./point";
 import { Board } from "./board";
-import { TurnGateway } from "../../dataacesess/turnGateway";
-import { MoveGateway } from "../../dataacesess/moveGateway";
-import { SquareGateway } from "../../dataacesess/squareGateway";
+import { TurnGateway } from "../../infrastructure/turnGateway";
+import { MoveGateway } from "../../infrastructure/moveGateway";
+import { SquareGateway } from "../../infrastructure/squareGateway";
 import { INITIAL_BOARD } from "../../application/constants";
 
 const turnGateway = new TurnGateway();
