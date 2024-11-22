@@ -1,88 +1,18 @@
-import { Disc } from "../domain/disc";
+import { Disc } from "../domain/turn/disc";
 
 export const EMPTY = 0;
 export const DARK = 1;
 export const LIGHT = 2;
 
+const { Empty: E, Dark: D, Light: L } = Disc;
+
 export const INITIAL_BOARD: Disc[][] = [
-  [
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-  ],
-  [
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-  ],
-  [
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-  ],
-  [
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Dark,
-    Disc.Light,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-  ],
-  [
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    LIGHT,
-    DARK,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-  ],
-  [
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-  ],
-  [
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-  ],
-  [
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-    Disc.Empty,
-  ],
+  [E, E, E, E, E, E, E, E],
+  [E, E, E, E, E, E, E, E],
+  [E, E, E, E, E, E, E, E],
+  [E, E, E, D, L, E, E, E],
+  [E, E, E, L, D, E, E, E],
+  [E, E, E, E, E, E, E, E],
+  [E, E, E, E, E, E, E, E],
+  [E, E, E, E, E, E, E, E],
 ];

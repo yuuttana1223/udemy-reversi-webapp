@@ -1,14 +1,13 @@
 import mysql from "mysql2/promise";
 import { Turn } from "./turn";
-import { GameGateway } from "../dataacesess/gameGateway";
-import { TurnGateway } from "../dataacesess/turnGateway";
-import { MoveGateway } from "../dataacesess/moveGateway";
-import { SquareGateway } from "../dataacesess/squareGateway";
 import { toDisc } from "./disc";
-import { INITIAL_BOARD } from "../application/constants";
 import { Move } from "./move";
 import { Point } from "./point";
 import { Board } from "./board";
+import { TurnGateway } from "../../dataacesess/turnGateway";
+import { MoveGateway } from "../../dataacesess/moveGateway";
+import { SquareGateway } from "../../dataacesess/squareGateway";
+import { INITIAL_BOARD } from "../../application/constants";
 
 const turnGateway = new TurnGateway();
 const moveGateway = new MoveGateway();

@@ -1,4 +1,4 @@
-import { INITIAL_BOARD } from "../application/constants";
+import { INITIAL_BOARD } from "../../application/constants";
 import { Disc } from "./disc";
 import { Move } from "./move";
 

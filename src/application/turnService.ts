@@ -1,17 +1,13 @@
 import { connectMySQL } from "../dataacesess/connection";
 import { GameGateway } from "../dataacesess/gameGateway";
-import { MoveGateway } from "../dataacesess/moveGateway";
-import { SquareGateway } from "../dataacesess/squareGateway";
-import { TurnGateway } from "../dataacesess/turnGateway";
-import { toDisc } from "../domain/disc";
-import { Point } from "../domain/point";
-import { TurnRepository } from "../domain/turnRepository";
+import { GameRepository } from "../domain/game/gameRespository";
+import { toDisc } from "../domain/turn/disc";
+import { Point } from "../domain/turn/point";
+import { TurnRepository } from "../domain/turn/turnRepository";
 
 const gameGateway = new GameGateway();
-const turnGateway = new TurnGateway();
 const turnRepository = new TurnRepository();
-const moveGateway = new MoveGateway();
-const squareGateway = new SquareGateway();
+const gameRepository = new GameRepository();
 
 // DTO (Data Transfer Object)
 class FindLatestGameTurnByTurnCountOutput {
@@ -29,14 +25,17 @@ export class TurnService {
   ): Promise<FindLatestGameTurnByTurnCountOutput> {
     const conn = await connectMySQL();
     try {
-      const gameRecord = await gameGateway.fetchLatest(conn);
-      if (!gameRecord) {
+      const game = await gameRepository.findLatest(conn);
+      if (!game) {
         throw new Error("Latest game not found");
+      }
+      if (game.id === undefined) {
+        throw new Error("game.id is undefined");
       }
 
       const turn = await turnRepository.findByGameIdAndTurnCount(
         conn,
-        gameRecord.id,
+        game.id,
         turnCount
       );
 
@@ -57,15 +56,19 @@ export class TurnService {
     const conn = await connectMySQL();
     try {
       conn.beginTransaction();
-      const gameRecord = await gameGateway.fetchLatest(conn);
-      if (!gameRecord) {
+
+      const game = await gameRepository.findLatest(conn);
+      if (!game) {
         throw new Error("Latest game not found");
+      }
+      if (game.id === undefined) {
+        throw new Error("game.id is undefined");
       }
 
       const prevTurnCount = turnCount - 1;
       const prevTurn = await turnRepository.findByGameIdAndTurnCount(
         conn,
-        gameRecord.id,
+        game.id,
         prevTurnCount
       );
 
