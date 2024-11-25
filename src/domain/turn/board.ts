@@ -40,10 +40,13 @@ export class Board {
       });
     });
 
+    // 石を置く
     newDiscs[move.point.y][move.point.x] = move.disc;
 
-    // 石を置く
     // ひっくり返す
+    flipPoints.forEach((p) => {
+      newDiscs[p.y][p.x] = move.disc;
+    });
 
     return new Board(newDiscs);
   }
