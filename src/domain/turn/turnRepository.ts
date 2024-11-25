@@ -1,5 +1,5 @@
 import mysql from "mysql2/promise";
-import { Turn } from "./turn";
+import { Turn } from "../model/turn";
 import { toDisc } from "./disc";
 import { Move } from "./move";
 import { Point } from "./point";
@@ -8,6 +8,7 @@ import { TurnGateway } from "../../infrastructure/turnGateway";
 import { MoveGateway } from "../../infrastructure/moveGateway";
 import { SquareGateway } from "../../infrastructure/squareGateway";
 import { INITIAL_BOARD } from "../../application/constants";
+import { DomainError } from "../error/domainError";
 
 const turnGateway = new TurnGateway();
 const moveGateway = new MoveGateway();
@@ -26,7 +27,8 @@ export class TurnRepository {
     );
 
     if (!turnRecord) {
-      throw new Error(
+      throw new DomainError(
+        "SpecifiedTurnNotFount",
         `Turn not fount. game_id: ${gameId}, turn_count: ${turnCount}`
       );
     }

@@ -1,7 +1,8 @@
-import { Board, initialBoard } from "./board";
-import { Disc } from "./disc";
-import { Move } from "./move";
-import { Point } from "./point";
+import { DomainError } from "../error/domainError";
+import { Board, initialBoard } from "../turn/board";
+import { Disc } from "../turn/disc";
+import { Move } from "../turn/move";
+import { Point } from "../turn/point";
 
 export class Turn {
   constructor(
@@ -40,7 +41,8 @@ export class Turn {
   placeNext(disc: Disc, point: Point): Turn {
     // 打とうとした石が、次の石ではない場合、置くことができない
     if (disc !== this._nextDisc) {
-      throw new Error(
+      throw new DomainError(
+        "SelectedDiscIsNotNextDisc",
         `It's not your turn. disc: ${disc}, nextDisc: ${this._nextDisc}`
       );
     }

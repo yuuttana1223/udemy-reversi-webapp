@@ -1,4 +1,5 @@
 import { INITIAL_BOARD } from "../../application/constants";
+import { DomainError } from "../error/domainError";
 import { Disc, isOppositeDisc } from "./disc";
 import { Move } from "./move";
 import { Point } from "./point";
@@ -17,7 +18,8 @@ export class Board {
   place(move: Move): Board {
     // TODO: 盤面に置けるかチェック
     if (this._discs[move.point.y][move.point.x] !== Disc.Empty) {
-      throw new Error(
+      throw new DomainError(
+        "SelectedPointIsNotEmpty",
         `Selected point is not empty. x: ${move.point.x}, y: ${move.point.y}`
       );
     }
@@ -27,7 +29,8 @@ export class Board {
 
     // ひっくり返せる点がない場合は置けない
     if (flipPoints.length === 0) {
-      throw new Error(
+      throw new DomainError(
+        "FlipPointsIsEmpty",
         `Cannot place disc at x: ${move.point.x}, y: ${move.point.y}`
       );
     }
