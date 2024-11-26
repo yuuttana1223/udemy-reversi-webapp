@@ -3,6 +3,7 @@ import { GameRepository } from "../../domain/game/gameRepository";
 import { toDisc } from "../../domain/turn/disc";
 import { Point } from "../../domain/turn/point";
 import { TurnRepository } from "../../domain/turn/turnRepository";
+import { ApplicationError } from "../error/applicationError";
 
 const turnRepository = new TurnRepository();
 const gameRepository = new GameRepository();
@@ -25,8 +26,12 @@ export class TurnService {
     try {
       const game = await gameRepository.findLatest(conn);
       if (!game) {
-        throw new Error("Latest game not found");
+        throw new ApplicationError(
+          "LatestGameNotFount",
+          "Latest game not found"
+        );
       }
+      // ここは予期しないエラーなので通常のエラーを投げる
       if (game.id === undefined) {
         throw new Error("game.id is undefined");
       }
@@ -57,7 +62,10 @@ export class TurnService {
 
       const game = await gameRepository.findLatest(conn);
       if (!game) {
-        throw new Error("Latest game not found");
+        throw new ApplicationError(
+          "LatestGameNotFount",
+          "Latest game not found"
+        );
       }
       if (game.id === undefined) {
         throw new Error("game.id is undefined");
