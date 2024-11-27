@@ -1,5 +1,7 @@
 import express from "express";
 import { TurnService } from "../application/service/turnService";
+import { Point } from "../domain/turn/point";
+import { toDisc } from "../domain/turn/disc";
 
 export const turnRouter = express.Router();
 
@@ -43,10 +45,9 @@ turnRouter.post(
   // express.RequestをするとpaseIntが必要なくなる
   async (req: express.Request<{}, {}, TurnPostRequestBody>, res) => {
     const turnCount = req.body.turnCount;
-    const disc = req.body.move.disc;
-    const x = req.body.move.x;
-    const y = req.body.move.y;
-    await turnService.registerTurn(turnCount, disc, x, y);
+    const disc = toDisc(req.body.move.disc);
+    const point = new Point(req.body.move.x, req.body.move.y);
+    await turnService.registerTurn(turnCount, disc, point);
     // 1つ前のターンを取得
     res.status(201).end();
   }

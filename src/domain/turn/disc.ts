@@ -1,3 +1,4 @@
+import { DomainError } from "../error/domainError";
 // memo: classのほうがいいのか？
 export const Disc = {
   Empty: 0,
@@ -8,8 +9,7 @@ export const Disc = {
 
 export type Disc = (typeof Disc)[keyof typeof Disc];
 
-// TODO: もっと良い書き方があるので後で考える気持ちがある
-export const toDisc = (value: number): Disc => {
+export function toDisc(value: number): Disc {
   switch (value) {
     case Disc.Empty:
       return Disc.Empty;
@@ -17,10 +17,12 @@ export const toDisc = (value: number): Disc => {
       return Disc.Dark;
     case Disc.Light:
       return Disc.Light;
+    case Disc.Wall:
+      return Disc.Wall;
     default:
-      throw new Error(`Invalid value for Disc: ${value}`);
+      throw new DomainError("InvalidDiscValue", `Invalid disc value: ${value}`);
   }
-};
+}
 
 export function isOppositeDisc(disc1: Disc, disc2: Disc): boolean {
   return (
