@@ -54,6 +54,24 @@ export class Board {
     return new Board(newDiscs);
   }
 
+  existsValidMove(disc: Disc): boolean {
+    for (let y = 0; y < this._discs.length; y++) {
+      const row = this._discs[y];
+      for (let x = 0; x < row.length; x++) {
+        const discOnBoard = row[x];
+        if (discOnBoard !== Disc.Empty) {
+          continue;
+        }
+
+        const move = new Move(disc, new Point(x, y));
+        if (this.listFlipPoints(move).length !== 0) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   private listFlipPoints(move: Move): Point[] {
     const flipPoints: Point[] = [];
 
