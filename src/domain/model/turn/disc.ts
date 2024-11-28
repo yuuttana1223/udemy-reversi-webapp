@@ -1,4 +1,5 @@
-import { DomainError } from "../error/domainError";
+import { DomainError } from "../../error/domainError";
+
 // memo: classのほうがいいのか？
 export const Disc = {
   Empty: 0,

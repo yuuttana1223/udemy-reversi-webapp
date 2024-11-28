@@ -1,7 +1,7 @@
 import express from "express";
 import { TurnService } from "../application/service/turnService";
-import { Point } from "../domain/turn/point";
-import { toDisc } from "../domain/turn/disc";
+import { toDisc } from "../domain/model/turn/disc";
+import { Point } from "../domain/model/turn/point";
 
 export const turnRouter = express.Router();
 

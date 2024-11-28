@@ -1,8 +1,8 @@
-import { INITIAL_BOARD } from "../../application/constants";
-import { DomainError } from "../error/domainError";
+import { DomainError } from "../../error/domainError";
 import { Disc, isOppositeDisc } from "./disc";
 import { Move } from "./move";
 import { Point } from "./point";
+import { INITIAL_BOARD } from "../../../application/constants";
 
 export class Board {
   private _walledDiscs: Disc[][];

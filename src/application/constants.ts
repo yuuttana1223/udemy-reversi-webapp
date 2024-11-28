@@ -1,4 +1,4 @@
-import { Disc } from "../domain/turn/disc";
+import { Disc } from "../domain/model/turn/disc";
 
 const { Empty: E, Dark: D, Light: L } = Disc;
 

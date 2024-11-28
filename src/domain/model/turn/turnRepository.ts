@@ -1,14 +1,14 @@
 import mysql from "mysql2/promise";
-import { Turn } from "../model/turn";
 import { toDisc } from "./disc";
 import { Move } from "./move";
 import { Point } from "./point";
 import { Board } from "./board";
-import { TurnGateway } from "../../infrastructure/turnGateway";
-import { MoveGateway } from "../../infrastructure/moveGateway";
-import { SquareGateway } from "../../infrastructure/squareGateway";
-import { INITIAL_BOARD } from "../../application/constants";
-import { DomainError } from "../error/domainError";
+import { TurnGateway } from "../../../infrastructure/turnGateway";
+import { MoveGateway } from "../../../infrastructure/moveGateway";
+import { SquareGateway } from "../../../infrastructure/squareGateway";
+import { Turn } from "./turn";
+import { INITIAL_BOARD } from "../../../application/constants";
+import { DomainError } from "../../error/domainError";
 
 const turnGateway = new TurnGateway();
 const moveGateway = new MoveGateway();
