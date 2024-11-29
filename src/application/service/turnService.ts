@@ -4,9 +4,12 @@ import { TurnRepository } from "../../domain/model/turn/turnRepository";
 import { Disc } from "../../domain/model/turn/disc";
 import { Point } from "../../domain/model/turn/point";
 import { GameRepository } from "../../domain/model/game/gameRepository";
+import { GameResultRepository } from "../../domain/model/gameResult/gameResultRepository";
+import { GameResult } from "../../domain/model/gameResult/gameResult";
 
 const turnRepository = new TurnRepository();
 const gameRepository = new GameRepository();
+const gameResultRepository = new GameResultRepository();
 
 // DTO (Data Transfer Object)
 class FindLatestGameTurnByTurnCountOutput {
@@ -42,13 +45,17 @@ export class TurnService {
         turnCount
       );
 
+      const gameResult = turn.gameEnded()
+        ? await gameResultRepository.findByGameId(conn, game.id)
+        : undefined;
+
       // memo: interfaceを使うと何がいけないのだろうか？
       return new FindLatestGameTurnByTurnCountOutput(
         turnCount,
         turn.board.discs,
         turn.nextDisc,
         // TODO: 決着がついている場合、game_resultsテーブルから取得する
-        undefined
+        gameResult?.winnerDisc
       );
     } finally {
       await conn.end();
@@ -82,6 +89,12 @@ export class TurnService {
 
       // ターンを保存する
       await turnRepository.save(conn, newTurn);
+      // 勝敗が決した場合、対戦結果を保存する
+      if (newTurn.gameEnded()) {
+        const winnerDisc = newTurn.winnerDisc();
+        const gameResult = new GameResult(game.id, winnerDisc, newTurn.endAt);
+        await gameResultRepository.save(conn, gameResult);
+      }
       conn.commit();
     } finally {
       await conn.end();

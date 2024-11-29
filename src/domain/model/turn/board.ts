@@ -72,6 +72,12 @@ export class Board {
     return false;
   }
 
+  count(disc: Disc): number {
+    return this._discs
+      .flat()
+      .reduce<number>((acc, d) => acc + (d === disc ? 1 : 0), 0);
+  }
+
   private listFlipPoints(move: Move): Point[] {
     const flipPoints: Point[] = [];
 

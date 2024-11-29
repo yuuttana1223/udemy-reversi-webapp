@@ -8,7 +8,7 @@ export class GameRepository {
   async findLatest(conn: mysql.Connection): Promise<Game | undefined> {
     const gameRecord = await gameGateway.fetchLatest(conn);
     if (!gameRecord) {
-      return undefined;
+      return;
     }
 
     return new Game(gameRecord.id, gameRecord.startedAt);
