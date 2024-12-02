@@ -2,14 +2,22 @@ const EMPTY = 0;
 const DARK = 1;
 const LIGHT = 2;
 
+const WINNER_DRAW = 0;
+const WINNER_DARK = 1;
+const WINNER_LIGHT = 2;
+
 const boardElement = document.getElementById("board");
 const nextDiscMessageElement = document.getElementById("next-disc-message");
+const warningMessageElement = document.getElementById("warning-message");
 
-async function showBoard(turnCount) {
+async function showBoard(turnCount, prevDisc) {
   const response = await fetch(`/api/games/latest/turns/${turnCount}`);
   const responseBody = await response.json();
   const board = responseBody.board;
   const nextDisc = responseBody.nextDisc;
+  const winnerDisc = responseBody.winnerDisc;
+
+  showWarningMessage(prevDisc, nextDisc, winnerDisc);
 
   showNextDiscMessage(nextDisc);
 
@@ -37,7 +45,7 @@ async function showBoard(turnCount) {
           if (!res.ok) {
             return;
           }
-          await showBoard(nextTurnCount);
+          await showBoard(nextTurnCount, nextDisc);
         });
       }
 
@@ -46,10 +54,42 @@ async function showBoard(turnCount) {
   });
 }
 
+function discToString(disc) {
+  return disc === DARK ? "黒" : "白";
+}
+
+function showWarningMessage(prevDisc, nextDisc, winnerDisc) {
+  const message = warningMessage(prevDisc, nextDisc, winnerDisc);
+  warningMessageElement.textContent = message;
+
+  if (message === null) {
+    warningMessageElement.style.display = "none";
+    return;
+  }
+  warningMessageElement.style.display = "block";
+}
+
+function warningMessage(prevDisc, nextDisc, winnerDisc) {
+  if (nextDisc === null) {
+    if (winnerDisc === WINNER_DRAW) {
+      return "引き分けです。";
+    }
+    return `${discToString(winnerDisc)}の勝ちです。`;
+  }
+
+  if (prevDisc === nextDisc) {
+    const skippedDisc = prevDisc === DARK ? LIGHT : DARK;
+    return `${discToString(skippedDisc)}は置ける場所がありません。`;
+  }
+
+  return null;
+}
+
 function showNextDiscMessage(nextDisc) {
   if (nextDisc) {
-    const color = nextDisc === DARK ? "黒" : "白";
-    nextDiscMessageElement.textContent = `次は${color}の番です`;
+    nextDiscMessageElement.textContent = `次は${discToString(
+      nextDisc
+    )}の番です`;
   } else {
     nextDiscMessageElement.textContent = "";
   }
