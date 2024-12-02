@@ -1,14 +1,11 @@
 import { connectMySQL } from "../../infrastructure/connection";
-import { GameGateway } from "../../infrastructure/gameGateway";
 import { Game } from "../../domain/model/game/game";
 import { firstTurn } from "../../domain/model/turn/turn";
-import { TurnRepository } from "../../domain/model/turn/turnRepository";
-import { GameRepository } from "../../domain/model/game/gameRepository";
+import { TurnMySQLRepository } from "../../infrastructure/repository/turn/turnMySQLRepository";
+import { GameMySQLRepository } from "../../infrastructure/repository/game/gameMySQLRepository";
 
-const gameGateway = new GameGateway();
-
-const turnRepository = new TurnRepository();
-const gameRepository = new GameRepository();
+const turnRepository = new TurnMySQLRepository();
+const gameRepository = new GameMySQLRepository();
 
 export class GameService {
   async startNewGame() {

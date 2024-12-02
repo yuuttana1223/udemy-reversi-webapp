@@ -1,15 +1,15 @@
 import { connectMySQL } from "../../infrastructure/connection";
 import { ApplicationError } from "../error/applicationError";
-import { TurnRepository } from "../../domain/model/turn/turnRepository";
 import { Disc } from "../../domain/model/turn/disc";
 import { Point } from "../../domain/model/turn/point";
-import { GameRepository } from "../../domain/model/game/gameRepository";
-import { GameResultRepository } from "../../domain/model/gameResult/gameResultRepository";
 import { GameResult } from "../../domain/model/gameResult/gameResult";
+import { TurnMySQLRepository } from "../../infrastructure/repository/turn/turnMySQLRepository";
+import { GameMySQLRepository } from "../../infrastructure/repository/game/gameMySQLRepository";
+import { GameResultMySQLRepository } from "../../infrastructure/repository/gameResult/gameResultMySQLRepository";
 
-const turnRepository = new TurnRepository();
-const gameRepository = new GameRepository();
-const gameResultRepository = new GameResultRepository();
+const turnRepository = new TurnMySQLRepository();
+const gameRepository = new GameMySQLRepository();
+const gameResultRepository = new GameResultMySQLRepository();
 
 // DTO (Data Transfer Object)
 class FindLatestGameTurnByTurnCountOutput {
