@@ -2,10 +2,18 @@ import express from "express";
 import { TurnService } from "../application/service/turnService";
 import { toDisc } from "../domain/model/turn/disc";
 import { Point } from "../domain/model/turn/point";
+import { TurnMySQLRepository } from "../infrastructure/repository/turn/turnMySQLRepository";
+import { GameMySQLRepository } from "../infrastructure/repository/game/gameMySQLRepository";
+import { GameResultMySQLRepository } from "../infrastructure/repository/gameResult/gameResultMySQLRepository";
 
 export const turnRouter = express.Router();
 
-const turnService = new TurnService();
+const turnService = new TurnService(
+  // TODO: infrastructureの依存をなくす
+  new TurnMySQLRepository(),
+  new GameMySQLRepository(),
+  new GameResultMySQLRepository()
+);
 
 // これを定義することで、Serviceを変更してもレスポンスに影響がない
 interface TurnGetResponseBody {
